@@ -1,0 +1,120 @@
+{% extends 'Templates/base.html' %}
+
+<head>
+    < meta http-equiv="refresh" content="5">
+        {% block title %}Group Select{% endblock %}
+</head>
+
+{% block content %}
+<style>
+    body {
+        box-sizing: border-box;
+        padding: 0px 0px 70px 10px;
+    }
+
+    #chat-message-submit {
+        width: 10%;
+        height: 60px;
+        position: fixed;
+        bottom: 0;
+        right: 0;
+
+    }
+
+    #chat-message-input {
+
+
+        height: 60px;
+        width: 100%;
+        position: fixed;
+        bottom: 0;
+        overflow: hidden;
+
+
+
+    }
+</style>
+
+<body>
+
+    <h1 style="text-align: center;"> Welcome to {{groupname}} {{groupname |json_script:"group-name"}} chatroom</h1>
+
+    <div class="d-flex flex-column" id="chat-log">
+        {% for chat in chats %}
+        <div class="p-2"><strong>{{chat.user}}:</strong>{{chat.content}}</div>
+        {% endfor %}
+
+    </div>
+
+
+
+    <nav class="navbar fixed-bottom navbar-light bg-light">
+
+        <input type="text" id="chat-message-input" placeholder="Type message and press enter">
+        <input type="button" value="Send" id="chat-message-submit" class="btn btn-primary">
+    </nav>
+
+
+
+
+
+</body>
+
+<script>
+    const groupName = JSON.parse(document.getElementById('group-name').textContent)
+
+    var ws = new WebSocket('ws://' + window.location.host + '/ws/sc/' + groupName + '/')
+    ws.onopen = function () {
+
+    }
+
+    ws.onmessage = function (event) {
+        console.log(event)
+        const chatmsg = JSON.parse(event.data)
+
+
+        document.querySelector("#chat-log").innerHTML += '<div class="p-2">' + '<strong>' + chatmsg.username + ':' + '</strong>' + chatmsg.msg + "</div>";
+        const scrollingElement = (document.scrollingElement || document.body);
+        scrollingElement.scrollTop = scrollingElement.scrollHeight;
+
+
+
+
+
+    }
+    ws.onclose = function () {
+
+    }
+
+
+
+    document.getElementById("chat-message-submit").onclick = function (event) {
+        const messageInputDom = document.getElementById("chat-message-input")
+        const message = messageInputDom.value
+        ws.send(JSON.stringify({
+            'msg': message
+        }))
+        messageInputDom.value = " "
+
+
+
+    }
+
+    document.getElementById("chat-message-input").addEventListener("keypress", function (event) {
+        const messageInputDom = document.getElementById("chat-message-input")
+        const message = messageInputDom.value
+        if (event.key == "Enter") {
+
+            ws.send(JSON.stringify({
+                'msg': message
+            }))
+            messageInputDom.value = " "
+
+
+
+        }
+    })
+
+
+</script>
+{% endblock %}

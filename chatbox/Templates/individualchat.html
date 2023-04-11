@@ -1,0 +1,153 @@
+{% extends 'Templates/base.html' %}
+{% block title %}Group Select{% endblock %}
+
+
+
+{% block content %}
+<style>
+    .col-1{
+        background-color: rgb(201, 95, 95);
+        width:25%;
+        height:auto;
+    }
+    .col-3{
+        background-color: rgb(212, 224, 224);
+        width:75%;
+        height:100vh;
+        
+    }
+    
+    body {
+        box-sizing: border-box;
+        padding: 0px 0px 70px 10px;
+    }
+
+    #chat-message-submit {
+        width: 10%;
+        height: 60px;
+        position: fixed;
+        bottom: 0;
+        right: 0;
+
+    }
+
+    #chat-message-input {
+
+
+        height: 60px;
+        width: 100%;
+        position: fixed;
+        bottom: 0;
+        overflow: hidden;
+
+
+
+    }
+</style>
+
+</style>
+<body>
+  {{groupname |json_script:"group-name"}}
+    <div class="container">
+        <div class="row">
+          <div class="col-1">
+            <strong>Users online:</strong><br>
+            <div class="d-flex flex-column">
+                {% for u in users   %}
+                {% if u.username != user.username %}
+                <div class="p-2"><a style="text-decoration: none;" href="{% url 'chatbox' u.id %}">{{u.username}}</a></div>
+                {% endif %}
+                {% endfor %}
+                
+              </div>
+          </div>
+
+
+
+          <!-- ///////////////////////////// -->
+          <div class="col-3">
+            
+            <h1 style="text-align: center;"> {{sathi}}</h1>
+
+            <div class="d-flex flex-column" id="chat-log">
+                {% for chat in chats %}
+                {% if chat.user != user.username %}
+                <div class="p-2"><strong>{{chat.user}}:</strong>{{chat.content}}</div>
+                {% else %} 
+                <div class="p-2"><strong>You:</strong>{{chat.content}}</div>
+                {% endif %}
+                {% endfor %}
+        
+            </div>
+        
+        
+        
+            <nav class="navbar fixed-bottom navbar-light bg-light">
+        
+                <input type="text" id="chat-message-input" placeholder="Type message and press enter">
+                <input type="button" value="Send" id="chat-message-submit" class="btn btn-primary">
+            </nav>
+
+          </div>
+ 
+        </div>
+      </div>
+
+      <script>
+           const groupName = JSON.parse(document.getElementById('group-name').textContent)
+
+var ws = new WebSocket('ws://' + window.location.host + '/ws/sc/' + groupName + '/')
+ws.onopen = function () {
+console.write("conne")
+}
+
+ws.onmessage = function (event) {
+    console.log(event)
+    const chatmsg = JSON.parse(event.data)
+
+
+    document.querySelector("#chat-log").innerHTML += '<div class="p-2">' + '<strong>' + chatmsg.username + ':' + '</strong>' + chatmsg.msg + "</div>";
+    const scrollingElement = (document.scrollingElement || document.body);
+    scrollingElement.scrollTop = scrollingElement.scrollHeight;
+
+
+
+
+
+}
+ws.onclose = function () {
+
+}
+
+
+
+document.getElementById("chat-message-submit").onclick = function (event) {
+    const messageInputDom = document.getElementById("chat-message-input")
+    const message = messageInputDom.value
+    ws.send(JSON.stringify({
+        'msg': message
+    }))
+    messageInputDom.value = " "
+
+
+
+}
+
+document.getElementById("chat-message-input").addEventListener("keypress", function (event) {
+    const messageInputDom = document.getElementById("chat-message-input")
+    const message = messageInputDom.value
+    if (event.key == "Enter") {
+
+        ws.send(JSON.stringify({
+            'msg': message
+        }))
+        messageInputDom.value = " "
+
+
+
+    }
+})
+      </script>
+  </body>
+
+{% endblock %}

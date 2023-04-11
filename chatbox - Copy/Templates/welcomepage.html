@@ -1,0 +1,62 @@
+{% extends 'Templates/base.html' %}
+{% block title %}Indivudual chat Select{% endblock %}
+
+{% block content %}
+<style>
+    .searchbar {
+        text-align: center;
+        padding-top: 20px;
+    }
+</style>
+
+<body>
+    <div class="searchbar">
+        <Label>Enter group name to create</Label><br>
+        <input type="text" id="creategroup"><br>
+        <p id="linkgen"></p>
+        <h1>OR</h1>
+        <label for="groupname">Enter  valid Group name to join</label><br>
+        <input type="text" name="groupname" id="joingroup">
+        <h1>OR</h1>
+        <a class="btn btn-primary" href="{% url 'individualchat' %}">Individual Chat</a>
+    </div>
+</body>
+
+<script>
+    
+/////NEW GROUP CREATE FEATURE
+
+    document.getElementById("creategroup").addEventListener("keypress", function (event) {
+
+        if (event.key == "Enter") {
+
+            val = document.getElementById("creategroup").value
+            var a = document.createElement('a');
+            linkk = "http://127.0.0.1:8000/"+ val+"/"
+            fetch(linkk)
+            location.replace("http://127.0.0.1:8000/groupchat/"+val)
+           
+           
+                       
+
+        }       
+    })
+
+
+ 
+
+
+    document.getElementById("joingroup").addEventListener("keypress", function (event) {
+
+        if (event.key == "Enter") {
+            var groupname = document.getElementById("joingroup").value
+            location.replace("http://127.0.0.1:8000/groupchat/"+groupname)
+
+        }
+    })
+
+   
+
+</script>
+
+{% endblock %}
